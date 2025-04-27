@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enhanced Birthday Glitch Card</title>
+  <!-- Google model‑viewer -->
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    :root {
+      --bg: #000;
+      --accent: #00eaff;
+      --text: #fff;
+    }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    model-viewer {
+      width: 90vmin;
+      height: 90vmin;
+      --poster-color: var(--bg);
+      --progress-bar-color: var(--accent);
+      z-index: 1;
+    }
+
+    /* ===== glitch animation ===== */
+    @keyframes glitchy {
+      0% {
+        transform: translate(0) rotate(0deg);
+        filter: hue-rotate(0deg) saturate(1);
+      }
+      20% {
+        transform: translate(-4px, 3px) rotate(1deg);
+        filter: hue-rotate(40deg) saturate(3);
+      }
+      40% {
+        transform: translate(6px, -5px) rotate(-1deg);
+        filter: hue-rotate(-40deg) saturate(2.5);
+      }
+      60% {
+        transform: translate(-3px, 4px) rotate(0.5deg);
+        filter: hue-rotate(20deg) saturate(3.2);
+      }
+      80% {
+        transform: translate(2px, -3px) rotate(-0.5deg);
+        filter: hue-rotate(-20deg) saturate(2.8);
+      }
+      100% {
+        transform: translate(0) rotate(0deg);
+        filter: hue-rotate(0deg) saturate(1);
+      }
+    }
+    .glitch {
+      animation: glitchy 0.4s steps(2, end) infinite;
+    }
+    
+    /* Text overlay */
+    .text-overlay {
+      position: absolute;
+      top: 10%;
+      left: 0;
+      width: 100%;
+      text-align: center;
+      z-index: 2;
+      text-shadow: 0 0 10px var(--accent);
+      pointer-events: none;
+    }
+    
+    .birthday-text {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: fadeInUp 1s forwards 1s;
+    }
+    
+    .message-text {
+      font-size: 1.2rem;
+      max-width: 80%;
+      margin: 0 auto;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: fadeInUp 1s forwards 1.5s;
+    }
+    
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* Confetti */
+    .confetti-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3;
+    }
+    
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: var(--accent);
+      opacity: 0.7;
+    }
+    
+    /* Countdown */
+    .countdown {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--bg);
+      color: var(--accent);
+      font-size: 10rem;
+      font-weight: bold;
+      z-index: 10;
+    }
+  </style>
+</head>
+<body>
+  <div id="countdown" class="countdown">3</div>
+
+  <div class="text-overlay">
+    <h1 class="birthday-text">生日快乐！</h1>
+    <p class="message-text">愿你的新一年充满惊喜与欢乐，就像这个闪闪发光的3D贺卡一样炫酷！</p>
+  </div>
+  
+  <div class="confetti-container" id="confetti"></div>
+  
+  <!-- Replace "model.glb" with the actual URL of your uploaded GLB -->
+  <model-viewer
+    id="viewer"
+    src="model.glb"
+    auto-rotate
+    camera-controls
+    autoplay
+    exposure="1"
+    background-color="var(--bg)"
+    rotation-per-second="30deg"
+    ar
+  ></model-viewer>
+
+  <audio id="bgm" src="party.mp3" loop></audio>
+
+  <script>
+    const viewer = document.getElementById("viewer");
+    const bgm = document.getElementById("bgm");
+    const countdown = document.getElementById("countdown");
+    const confettiContainer = document.getElementById("confetti");
+    
+    // Countdown
+    let count = 3;
+    const countdownInterval = setInterval(() => {
+      count--;
+      if (count > 0) {
+        countdown.textContent = count;
+      } else if (count === 0) {
+        countdown.textContent = "🎉";
+      } else {
+        countdown.style.display = "none";
+        bgm.play();
+        createConfetti();
+        clearInterval(countdownInterval);
+      }
+    }, 1000);
+    
+    // Mobile autoplay fix
+    window.addEventListener("click", () => {
+      if (bgm.paused) {
+        bgm.play();
+      }
+    });
+    
+    // Periodic glitch effect
+    setInterval(() => {
+      viewer.classList.add("glitch");
+      setTimeout(() => viewer.classList.remove("glitch"), 400);
+    }, 2000);
+    
+    // Create confetti
+    function createConfetti() {
+      const colors = ["#00eaff", "#ff00ea", "#eaff00", "#ea00ff"];
+      const confettiCount = 100;
+      
+      for (let i = 0; i < confettiCount; i++) {
+        const confetti = document.createElement("div");
+        confetti.classList.add("confetti");
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.left = Math.random() * 100 + "vw";
+        confetti.style.top = -10 + "px";
+        confetti.style.width = Math.random() * 10 + 5 + "px";
+        confetti.style.height = Math.random() * 10 + 5 + "px";
+        confetti.style.transform = "rotate(" + Math.random() * 360 + "deg)";
+        
+        confettiContainer.appendChild(confetti);
+        
+        const animationDuration = Math.random() * 3 + 2;
+        const animationDelay = Math.random() * 5;
+        
+        confetti.animate([
+          { transform: `translateY(0) rotate(0deg)`, opacity: 1 },
+          { transform: `translateY(${window.innerHeight}px) rotate(${Math.random() * 360}deg)`, opacity: 0 }
+        ], {
+          duration: animationDuration * 1000,
+          delay: animationDelay * 1000,
+          iterations: Infinity
+        });
+      }
+    }
+  </script>
+</body>
+</html> 
